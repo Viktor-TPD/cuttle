@@ -21,6 +21,7 @@
           icon="mdi-account-clock"
           size="large"
           aria-label="Show game history"
+          title="Show game history"
           aria-hidden="false"
           role="button"
           @click.stop="showHistoryDrawer = !showHistoryDrawer"
