@@ -21,6 +21,7 @@
         icon
         variant="text"
         aria-label="Close snackbar"
+        title="Close snackbar"
         @click="clear"
       >
         <v-icon icon="mdi-close" aria-hidden="true" />

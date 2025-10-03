@@ -14,6 +14,7 @@
         size="x-large"
         data-cy="cancel-move"
         aria-lable="Cancel Move"
+        title="Cancel Move"
         @click="$emit('cancel')"
       >
         <v-icon
