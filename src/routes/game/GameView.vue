@@ -7,16 +7,11 @@
 
     <!-- Authenticated View -->
     <template v-else>
-      <div
-        id="game-menu-wrapper"
-        class="d-flex flex-column flex-sm-row align-center"
-        :style="menuWrapperStyle"
-      >
+      <div id="game-menu-wrapper" class="d-flex flex-col flex-sm-row align-center" :style="menuWrapperStyle">
         <SpectatorListMenu :spectating-users="spectatingUsers" :vuetify-display="$vuetify" />
         <RulesMenuButton></RulesMenuButton>
         <GameMenu :is-spectating="isSpectating" @handle-error="handleError" />
         <v-icon
-          v-if="$vuetify.display.xs"
           color="white"
           icon="mdi-account-clock"
           size="large"
@@ -297,22 +292,22 @@
         </div>
       </div>
 
-      <!-- History -->
-      <div v-if="$vuetify.display.smAndUp" class="history-container">
-        <div id="field-right">
-          <div id="history" class="d-flex flex-column justify-start align-center elevation-10">
-            <h3 class="history-title">
-              {{ $t('game.history.title') }}
-            </h3>
-            <v-divider />
-            <div id="history-logs" ref="logsContainer" class="d-flex flex-column">
-              <p v-for="(log, index) in logs" :key="index" class="my-2" data-cy="history-log">
-                {{ log }}
-              </p>
+      <!-- Desktop History Card -->
+      <v-slide-x-reverse-transition>
+        <div v-if="$vuetify.display.smAndUp && showHistoryDrawer" class="history-container">
+          <div id="field-right">
+            <div id="history" class="d-flex flex-column justify-start align-center elevation-10">
+              <h3 class="history-title">{{ $t('game.history.title') }}</h3>
+              <v-divider />
+              <div id="history-logs" ref="logsContainer" class="d-flex flex-column">
+                <p v-for="(log, index) in logs" :key="index" class="my-2" data-cy="history-log">
+                  {{ log }}
+                </p>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      </v-slide-x-reverse-transition>
 
       <h3 id="player-score">
         <span>{{ t('game.score.points') }}: {{ gameStore.playerPointTotal }}</span>
@@ -1366,25 +1361,19 @@ export default {
       height: 85%;
       font-size: 0.75em;
       letter-spacing: 0.25px;
-      font-family:
-        'Libre Baskerville',
-        Century Gothic,
-        CenturyGothic,
-        AppleGothic,
-        sans-serif;
+      font-family: 'changa', serif;
     }
   }
+}
+
+.c-history-drawer {
+  background-color: rgba(241, 200, 160, 0.9);
 }
 
 .history-title {
   font-size: 1.25em;
   font-weight: 700;
-  font-family:
-    'Cormorant Infant',
-    Century Gothic,
-    CenturyGothic,
-    AppleGothic,
-    sans-serif;
+  font-family: 'changa', serif;
 }
 
 @media screen and (min-width: 1024px) {
@@ -1411,7 +1400,7 @@ export default {
     }
   }
   .history-title {
-    font-size: 48px;
+    font-size: 2.5rem;
   }
 }
 
