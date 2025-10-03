@@ -16,9 +16,6 @@
       </template>
       <!-- Menu -->
       <v-list id="game-menu" class="text-surface-1" bg-color="surface-2">
-        <v-list-item data-cy="rules-open" prepend-icon="mdi-information" @click="shownDialog = 'rules'">
-          {{ t('game.menus.gameMenu.rules') }}
-        </v-list-item>
         <!-- Stop Spectating -->
         <v-list-item
           v-if="isSpectating"
@@ -37,7 +34,11 @@
           >
             {{ t('game.menus.gameMenu.concede') }}
           </v-list-item>
-          <v-list-item data-cy="stalemate-initiate" prepend-icon="mdi-handshake" @click="shownDialog = 'stalemate'">
+          <v-list-item
+            data-cy="stalemate-initiate"
+            prepend-icon="mdi-handshake"
+            @click="shownDialog = 'stalemate'"
+          >
             {{ t('game.menus.gameMenu.stalemate') }}
           </v-list-item>
         </template>
@@ -58,8 +59,6 @@
         </v-list-item>
       </v-list>
     </v-menu>
-
-    <RulesDialog v-model="showRulesDialog" @open="closeMenu" @close="closeDialog" />
 
     <BaseDialog id="request-gameover-dialog" v-model="showEndGameDialog" :title="dialogTitle">
       <template #body>
@@ -100,14 +99,12 @@ import { useAuthStore } from '@/stores/auth';
 import { useGameStore } from '@/stores/game';
 import { useGameHistoryStore } from '@/stores/gameHistory';
 import BaseDialog from '@/components/BaseDialog.vue';
-import RulesDialog from '@/routes/game/components/dialogs/components/RulesDialog.vue';
 import TheLanguageSelector from '@/components/TheLanguageSelector.vue';
 export default {
   name: 'GameMenu',
   components: {
     BaseDialog,
-    RulesDialog,
-    TheLanguageSelector
+    TheLanguageSelector,
   },
   props: {
     isSpectating: {
@@ -115,22 +112,22 @@ export default {
       required: true,
     },
   },
-  emits: [ 'handle-error' ],
+  emits: ['handle-error'],
   setup() {
     const { t } = useI18n();
     return { t };
   },
   data() {
     return {
-      shownDialog:'',
-      showGameMenu: false,      
+      shownDialog: '',
+      showGameMenu: false,
       loading: false,
       clipCopiedToClipboard: false,
     };
   },
   computed: {
     ...mapStores(useAuthStore, useGameStore, useGameHistoryStore),
-    showEndGameDialog:{
+    showEndGameDialog: {
       get() {
         return this.showConcedeDialog || this.showStalemateDialog;
       },
@@ -143,35 +140,27 @@ export default {
       },
     },
     dialogTitle() {
-      return this.t( this.showConcedeDialog ? 'game.menus.gameMenu.concede' : 'game.menus.gameMenu.stalemate');
+      return this.t(this.showConcedeDialog ? 'game.menus.gameMenu.concede' : 'game.menus.gameMenu.stalemate');
     },
     dialogText() {
-      return this.t(this.showConcedeDialog
-        ? 'game.menus.gameMenu.concedeDialog'
-        : 'game.menus.gameMenu.stalemateDialog');
+      return this.t(
+        this.showConcedeDialog ? 'game.menus.gameMenu.concedeDialog' : 'game.menus.gameMenu.stalemateDialog',
+      );
     },
     buttonSize() {
       return this.$vuetify.display.mdAndDown ? 'small' : 'medium';
     },
-    showRulesDialog: {
-      get() {
-        return this.shownDialog === 'rules';
-      },
-      set(val) {
-        this.shownDialog = val ? 'rules' : '';
-      }
-    },
-    showConcedeDialog(){ 
+    showConcedeDialog() {
       return this.shownDialog === 'concede';
     },
-    showStalemateDialog(){
+    showStalemateDialog() {
       return this.shownDialog === 'stalemate';
-    }
+    },
   },
   watch: {
     showGameMenu() {
       this.clipCopiedToClipboard = false;
-    }
+    },
   },
   methods: {
     closeMenu() {
@@ -222,8 +211,8 @@ export default {
     },
     async refresh() {
       await this.authStore.reconnectSocket();
-    }
-  }
+    },
+  },
 };
 </script>
 <style lang="scss" scoped>
