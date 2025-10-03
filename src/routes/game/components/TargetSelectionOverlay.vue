@@ -22,6 +22,7 @@
       icon
       data-cy="cancel-target-mobile"
       aria-label="Cancel move"
+      title="Cancel move"
       @click="$emit('cancel')"
     >
       <v-icon

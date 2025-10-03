@@ -1,6 +1,6 @@
 <template>
   <div>
-    <v-btn id="rules-button" icon variant="text" aria-label="Show Rules" @click="openDialog">
+    <v-btn id="rules-button" icon variant="text" aria-label="Show Rules" title="Show Rules" @click="openDialog">
       <v-icon color="neutral-lighten-2" icon="mdi-information" aria-hidden="true"></v-icon>
 
       <RulesDialog v-model="showDialog" @open="onOpen" @close="onClose"></RulesDialog>
