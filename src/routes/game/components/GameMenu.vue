@@ -10,6 +10,7 @@
           icon
           variant="text"
           aria-label="Open Game Menu"
+          title="Open Game Menu"
         >
           <v-icon color="neutral-lighten-2" icon="mdi-cog" aria-hidden="true" />
         </v-btn>

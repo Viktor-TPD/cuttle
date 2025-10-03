@@ -10,6 +10,7 @@
         icon
         variant="text"
         aria-label="View current spectators"
+        title="View current spectators"
       >
         <v-icon
           class="mr-1"
