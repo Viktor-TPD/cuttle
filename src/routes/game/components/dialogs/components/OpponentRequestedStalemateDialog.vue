@@ -30,6 +30,7 @@
         :loading="loadingReject"
         data-cy="reject-stalemate"
         aria-lable="Reject Request"
+        title="Reject Request"
         @click="rejectStalemate"
       >
         {{ t('game.dialogs.opponentRequestedStalemateDialog.reject') }}
@@ -41,6 +42,7 @@
         :loading="loadingAccept"
         :disabled="loadingReject"
         aria-lable="Accept Stalemate"
+        title="Accept Stalemate"
         @click="acceptStalemate"
       >
         {{ t('game.dialogs.opponentRequestedStalemateDialog.accept') }}
