@@ -11,13 +11,7 @@
         variant="text"
         aria-label="View current spectators"
       >
-        <v-icon
-          class="mr-1"
-          icon="mdi-eye-outline"
-          size="large"
-          aria-hidden="true"   
-        />
-        <span v-if="!$vuetify.display.xs" class="pr-2">{{ spectatingUsers.length }}</span>
+        <v-icon class="mr-1" icon="mdi-eye-outline" size="large" aria-hidden="true" />
       </v-btn>
     </template>
     <!-- Menu -->

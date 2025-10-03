@@ -8,18 +8,20 @@
     <!-- Authenticated View -->
     <template v-else>
       <div id="game-menu-wrapper" class="d-flex flex-col flex-sm-row align-center" :style="menuWrapperStyle">
-        <SpectatorListMenu :spectating-users="spectatingUsers" :vuetify-display="$vuetify" />
-        <RulesMenuButton></RulesMenuButton>
-        <GameMenu :is-spectating="isSpectating" @handle-error="handleError" />
-        <v-icon
-          color="white"
-          icon="mdi-account-clock"
-          size="large"
-          aria-label="Show game history"
-          aria-hidden="false"
-          role="button"
-          @click.stop="showHistoryDrawer = !showHistoryDrawer"
-        />
+        <ul class="menu-icon-list">
+          <SpectatorListMenu :spectating-users="spectatingUsers" :vuetify-display="$vuetify" />
+          <RulesMenuButton></RulesMenuButton>
+          <GameMenu :is-spectating="isSpectating" @handle-error="handleError" />
+          <v-icon
+            color="white"
+            icon="mdi-account-clock"
+            size="large"
+            aria-label="Show game history"
+            aria-hidden="false"
+            role="button"
+            @click.stop="showHistoryDrawer = !showHistoryDrawer"
+          />
+        </ul>
       </div>
 
       <!-- Mobile History Drawer -->
@@ -35,7 +37,7 @@
             <template #append>
               <v-btn icon variant="text" @click.stop="showHistoryDrawer = !showHistoryDrawer">
                 <v-icon
-                  color="neutral"
+                  color="black"
                   icon="mdi-window-close"
                   size="large"
                   aria-label="window close icon"
@@ -1208,6 +1210,13 @@ export default {
   display: inline-block;
   right: 0;
   margin: 10px;
+}
+
+.menu-icon-list {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
 
 .valid-move {
