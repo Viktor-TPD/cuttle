@@ -324,6 +324,7 @@
           :class="{ 'text-black': gameStore.isPlayersTurn, 'text-white': !gameStore.isPlayersTurn }"
         >
           {{ turnText }}
+          {{ `${gameStore.turnTimer}s` }}
         </span>
       </h3>
 
