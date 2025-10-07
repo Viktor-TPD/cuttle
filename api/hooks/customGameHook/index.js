@@ -8,12 +8,21 @@ module.exports = function gameHook() {
   // Game API //
   //////////////
   return {
-    createGame: function (gameName, isRanked = false, status = GameStatus.CREATED) {
+    createGame: function (gameName, isRanked = false, status = GameStatus.CREATED, timerSettings = {}) {
       return new Promise(function (resolve, reject) {
+        const {
+          enabled: timerEnabled = false,
+          type: timerType = 'turn',
+          duration: timerDuration = 90,
+        } = timerSettings;
+
         Game.create({
           name: gameName,
           isRanked: isRanked === true,
           status,
+          timerEnabled,
+          timerType,
+          timerDuration,
         })
           .fetch()
           .then((game) => {

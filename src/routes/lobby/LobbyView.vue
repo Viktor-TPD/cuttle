@@ -49,9 +49,10 @@
                 :data-cy="`ready-button-${rankedIcon}-icon`"
               />
             </v-btn>
-            <div
-              class="d-flex flex-row justify-md-space-between justify-space-evenly align-center flex-wrap my-4"
-            >
+
+            <!-- Vertical Stack: Ranked -> Timer -> Exit -->
+            <div class="lobby-info-stack">
+              <!-- Ranked Switch -->
               <div class="rank-switch">
                 <v-switch
                   v-model="gameStore.isRanked"
@@ -66,10 +67,28 @@
                 />
                 <v-icon class="mr-2 mr-md-4" size="medium" :icon="`mdi-${rankedIcon}`" aria-hidden="true" />
               </div>
+
+              <!-- Timer Info Display -->
+              <div class="timer-info" data-cy="lobby-timer-info">
+                <v-icon
+                  class="ml-2 ml-md-4"
+                  size="medium"
+                  :icon="timerInfo.enabled ? 'mdi-timer' : 'mdi-timer-off'"
+                  aria-hidden="true"
+                />
+                <span class="mx-2">
+                  <template v-if="timerInfo.enabled">
+                    {{ timerInfo.formatted }} ({{ timerInfo.preset }})
+                  </template>
+                  <template v-else> No Timer </template>
+                </span>
+              </div>
+
+              <!-- Exit Button -->
               <v-btn
                 :disabled="readying"
                 variant="text"
-                class="w-50 px-16 py-2"
+                class="exit-button"
                 color="surface-2"
                 data-cy="exit-button"
                 size="x-large"
@@ -102,16 +121,18 @@ import { useRouter, onBeforeRouteLeave } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { useGameStore } from '@/stores/game';
 import { useAuthStore } from '@/stores/auth';
+import { UseGameTimer } from '@/composables/useGameTimer';
 import { useOverlayStore } from '@/stores/overlay';
 import { playAudio } from '@/util/audio.js';
 import PlayerReadyIndicator from '@/components/PlayerReadyIndicator.vue';
 import BaseSnackbar from '@/components/BaseSnackbar.vue';
 import TheLanguageSelector from '@/components/TheLanguageSelector.vue';
-import { ROUTE_NAME_GAME } from '_/src/router';
+import { ROUTE_NAME_GAME } from '@/router.js';
 
 // Deps
 const { t } = useI18n();
 const router = useRouter();
+const { formatTime, TIMER_PRESETS } = UseGameTimer();
 
 // Audio
 const joinAudio = new Audio('/sounds/lobby/enter-lobby.mp3');
@@ -138,6 +159,24 @@ const readyButtonText = computed(() => t(iAmReady.value ? 'lobby.unready' : 'lob
 const rankedIcon = computed(() => (gameStore.isRanked ? 'sword-cross' : 'coffee'));
 
 const opponentUsername = computed(() => gameStore.opponentUsername);
+
+const timerInfo = computed(() => {
+  if (!gameStore.timerEnabled) {
+    return { enabled: false };
+  }
+
+  // Find preset label
+  const preset = TIMER_PRESETS.find((p) => p.value === gameStore.timerDuration);
+  const presetLabel = preset ? preset.label : 'Custom';
+
+  return {
+    enabled: true,
+    duration: gameStore.timerDuration,
+    formatted: formatTime(gameStore.timerDuration),
+    preset: presetLabel,
+    type: gameStore.timerType,
+  };
+});
 
 // Methods
 async function ready() {
@@ -212,15 +251,43 @@ onBeforeRouteLeave((to, from, next) => {
   width: min-content;
 }
 
+.lobby-info-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin: 16px 0;
+  width: 100%;
+}
+
 .rank-switch {
-  border: 1px solid;
+  /* border: 1px solid; */
   display: flex;
   color: rgba(var(--v-theme-surface-2));
   border-radius: 5px;
   justify-content: center;
   align-items: center;
   padding: 0 64px;
-  width: 50%;
+  width: 100%;
+  height: 56px;
+}
+
+.timer-info {
+  /* border: 1px solid; */
+  display: flex;
+  color: rgba(var(--v-theme-surface-2));
+  /* border-radius: 5px; */
+  justify-content: center;
+  align-items: center;
+  padding: 0 64px;
+  width: 100%;
+  height: 56px;
+  font-size: 1rem;
+  white-space: nowrap;
+}
+
+.exit-button {
+  width: 100%;
+  padding: 16px 64px;
 }
 
 .vs-logo {
@@ -257,13 +324,22 @@ h5 {
 
 @media (min-width: 980px) {
   .rank-switch {
-    padding: 0;
+    padding: 0 32px;
+  }
+
+  .timer-info {
+    padding: 0 32px;
   }
 }
 
 @media (max-width: 660px) {
   .rank-switch {
     padding: 0 3vw;
+  }
+
+  .timer-info {
+    padding: 0 3vw;
+    font-size: 0.9rem;
   }
 
   h1 {
@@ -286,6 +362,14 @@ h5 {
 @media (max-width: 350px) {
   .rank-switch {
     width: 100%;
+  }
+
+  .timer-info {
+    width: 100%;
+  }
+
+  .exit-button {
+    padding: 16px 32px;
   }
 }
 
