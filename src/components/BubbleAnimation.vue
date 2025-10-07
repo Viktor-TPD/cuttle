@@ -1,11 +1,17 @@
 <template>
   <div class="bubble-overlay">
-    <div v-for="(style, i) in bubbleStyles" :key="i" class="bubble" :style="style"></div>
+    <div
+      v-for="(style, i) in bubbleStyles"
+      :key="i"
+      class="bubble"
+      :style="style"
+      @animationend="onBubbleEnd"
+    ></div>
   </div>
 </template>
 
 <script setup>
-import { computed } from 'vue';
+import { computed, ref, onMounted } from 'vue';
 
 const props = defineProps({
   bubbleCount: { type: Number, default: 20 },
@@ -16,6 +22,9 @@ const props = defineProps({
   minDelay: { type: Number, default: 0 },
   maxDelay: { type: Number, default: 5 },
 });
+
+const emit = defineEmits(['finished']);
+const finishedCount = ref(0);
 
 const randomBetween = (min, max) => Math.random() * (max - min) + min;
 
@@ -35,6 +44,18 @@ const bubbleStyles = computed(() => {
     };
   });
 });
+
+onMounted(() => {
+  const maxDuration = Math.max(
+    ...bubbleStyles.value.map((style) => {
+      const delay = parseFloat(style.animationDelay);
+      const duration = parseFloat(style.animationDuration);
+      return delay + duration;
+    }),
+  );
+
+  setTimeout(() => emit('finished'), (maxDuration + 2) * 1000);
+});
 </script>
 
 <style lang="scss" scoped>
@@ -47,7 +68,7 @@ const bubbleStyles = computed(() => {
 
 .bubble {
   position: absolute;
-  bottom: -200px;
+  bottom: -300px;
   background-color: rgba($color: #000000, $alpha: 0.1);
   border: 8px solid white;
   border-radius: 50%;
@@ -55,7 +76,6 @@ const bubbleStyles = computed(() => {
   animation-timing-function: linear;
   animation-iteration-count: 1;
   animation-fill-mode: forwards;
-  animation-duration: 2s;
 
   &::before {
     content: '';
@@ -76,7 +96,7 @@ const bubbleStyles = computed(() => {
     opacity: 1;
   }
   to {
-    transform: translateY(-150vh) scale(0.5);
+    transform: translateY(-200vh) scale(0.5);
     opacity: 0.7;
   }
 }
