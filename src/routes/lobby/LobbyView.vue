@@ -1,5 +1,14 @@
 <template>
   <div id="lobby-wrapper">
+    <BubbleAnimation
+      :bubble-count="500"
+      :min-size="50"
+      :max-size="200"
+      :min-speed="0.7"
+      :max-speed="0.9"
+      :min-delay="0.5"
+      :max-delay="2"
+    />
     <div class="langauge-selector">
       <TheLanguageSelector variant="light" />
     </div>
@@ -18,7 +27,7 @@
           />
         </v-col>
         <v-col md="4" cols="12" class="d-flex align-center justify-center">
-          <img src="/img/logo-stalemate.svg" class="vs-logo" alt="stalemate logo">
+          <img src="/img/logo-stalemate.svg" class="vs-logo" alt="stalemate logo" />
         </v-col>
         <v-col md="4" cols="12">
           <PlayerReadyIndicator
@@ -49,7 +58,9 @@
                 :data-cy="`ready-button-${rankedIcon}-icon`"
               />
             </v-btn>
-            <div class="d-flex flex-row justify-md-space-between justify-space-evenly align-center flex-wrap my-4">
+            <div
+              class="d-flex flex-row justify-md-space-between justify-space-evenly align-center flex-wrap my-4"
+            >
               <div class="rank-switch">
                 <v-switch
                   v-model="gameStore.isRanked"
@@ -62,12 +73,7 @@
                   @update:model-value="setIsRanked"
                   @keydown.enter.stop="(e) => e.target.click()"
                 />
-                <v-icon
-                  class="mr-2 mr-md-4"
-                  size="medium"
-                  :icon="`mdi-${rankedIcon}`"
-                  aria-hidden="true"
-                />
+                <v-icon class="mr-2 mr-md-4" size="medium" :icon="`mdi-${rankedIcon}`" aria-hidden="true" />
               </div>
               <v-btn
                 :disabled="readying"
@@ -89,7 +95,8 @@
     <BaseSnackbar
       v-model="gameStore.showIsRankedChangedAlert"
       :timeout="2000"
-      :message="`${t('lobby.rankedChangedAlert')} ${gameStore.isRanked ? t('global.ranked') : t('global.casual')
+      :message="`${t('lobby.rankedChangedAlert')} ${
+        gameStore.isRanked ? t('global.ranked') : t('global.casual')
       }`"
       color="surface-1"
       data-cy="edit-snackbar"
@@ -109,6 +116,7 @@ import PlayerReadyIndicator from '@/components/PlayerReadyIndicator.vue';
 import BaseSnackbar from '@/components/BaseSnackbar.vue';
 import TheLanguageSelector from '@/components/TheLanguageSelector.vue';
 import { ROUTE_NAME_GAME } from '_/src/router';
+import BubbleAnimation from '_/src/components/BubbleAnimation.vue';
 
 // Deps
 const { t } = useI18n();
@@ -135,7 +143,7 @@ const iAmReady = computed(() => {
 
 const readyButtonText = computed(() => t(iAmReady.value ? 'lobby.unready' : 'lobby.ready'));
 
-const rankedIcon = computed(() => gameStore.isRanked ? 'sword-cross' : 'coffee');
+const rankedIcon = computed(() => (gameStore.isRanked ? 'sword-cross' : 'coffee'));
 
 const opponentUsername = computed(() => gameStore.opponentUsername);
 
