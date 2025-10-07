@@ -56,6 +56,18 @@ const bubbleStyles = computed(() => {
   animation-iteration-count: 1;
   animation-fill-mode: forwards;
   animation-duration: 2s;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 20%;
+    left: 25%;
+    width: 40%;
+    height: 20%;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.9);
+    filter: blur(2px);
+  }
 }
 
 @keyframes rise {
