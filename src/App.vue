@@ -5,6 +5,17 @@
       <RouterView />
     </v-main>
     <TheFooter v-if="showFooter" :variant="variant" />
+    <BubbleAnimation
+      v-if="overlayStore.showBubbles"
+      :bubble-count="300"
+      :min-size="30"
+      :max-size="150"
+      :min-speed="1.5"
+      :max-speed="2.5"
+      :min-delay="0"
+      :max-delay="2"
+      @finished="overlayStore.finishBubbles"
+    />
   </v-app>
 </template>
 
@@ -15,19 +26,13 @@ import TheFooter from '@/components/TheFooter.vue';
 import { useGameStore } from '@/stores/game';
 import { useAuthStore } from '@/stores/auth';
 import { useGameListStore } from '@/stores/gameList';
+import { useOverlayStore } from '@/stores/overlay';
+import BubbleAnimation from '@/components/BubbleAnimation.vue';
 
 export default {
-  components: {
-    TheHeader,
-    TheFooter,
-  },
-  data() {
-    return {
-      showNav: false,
-    };
-  },
+  components: { TheHeader, TheFooter, BubbleAnimation },
   computed: {
-    ...mapStores(useAuthStore),
+    ...mapStores(useAuthStore, useOverlayStore),
     isAuthenticated() {
       return this.authStore.authenticated;
     },
@@ -40,15 +45,17 @@ export default {
     },
     showFooter() {
       return this.showNav && this.isSmallDevice && this.isAuthenticated;
-    }
+    },
   },
   watch: {
     '$route.meta'({ hideNavigation }) {
       this.showNav = !hideNavigation;
     },
   },
+  data() {
+    return { showNav: false };
+  },
   created() {
-    // Pass store to window object on testing
     if (window.Cypress) {
       window.cuttle.gameStore = useGameStore();
       window.cuttle.authStore = useAuthStore();
@@ -59,7 +66,6 @@ export default {
 </script>
 
 <style lang="scss">
-
 @import '@/sass/typography';
 
 .gradient-text {
@@ -69,21 +75,17 @@ export default {
   -webkit-text-fill-color: transparent;
 }
 
-/* v-main automatically applies a min-height attribute of '100vh' to the '.v-application--wrap' class below */
-/* This can be an issue on mobile devices, as 'vh' unit does not account for the url bar in mobile browsers */
-/* Overriding min-height to be '100%' on screen sizes <600px ensures that the game view will fit within */
-/* mobile viewports without the need to scroll */
+/* v-main applies min-height:100vh to .v-application--wrap; adjust on small screens */
 @media (max-width: 600px) {
   div > .v-application--wrap {
     min-height: 100%;
   }
 }
 
-.sticky{
+.sticky {
   position: sticky;
   top: 0;
   width: 100%;
   z-index: 500;
 }
-
 </style>
