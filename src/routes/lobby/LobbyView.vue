@@ -122,6 +122,7 @@ import { useI18n } from 'vue-i18n';
 import { useGameStore } from '@/stores/game';
 import { useAuthStore } from '@/stores/auth';
 import { UseGameTimer } from '@/composables/useGameTimer';
+import { useOverlayStore } from '@/stores/overlay';
 import { playAudio } from '@/util/audio.js';
 import PlayerReadyIndicator from '@/components/PlayerReadyIndicator.vue';
 import BaseSnackbar from '@/components/BaseSnackbar.vue';
@@ -140,6 +141,7 @@ const leaveAudio = new Audio('/sounds/lobby/leave-lobby.mp3');
 // Stores
 const authStore = useAuthStore();
 const gameStore = useGameStore();
+const overlayStore = useOverlayStore();
 
 // Refs
 const readying = ref(false);
@@ -182,18 +184,13 @@ async function ready() {
   try {
     await gameStore.requestReady();
   } catch (err) {
-    // If game has already started; navigate to GameView
+    // If game has already started; trigger overlay bubbles and navigate
     if (err?.code === 'CONFLICT') {
-      router.push({
-        name: ROUTE_NAME_GAME,
-        params: {
-          gameId: err.gameId,
-        },
-      });
+      overlayStore.triggerBubbles({ name: ROUTE_NAME_GAME, params: { gameId: gameStore.id } });
     }
   }
-  readying.value = false;
 }
+readying.value = false;
 
 async function setIsRanked() {
   await gameStore.requestSetIsRanked({
@@ -219,6 +216,17 @@ watch(opponentUsername, (newVal) => {
 onMounted(() => {
   playAudio(joinAudio);
 });
+
+// Bubble animation watcher
+watch(
+  () => [gameStore.p0Ready, gameStore.p1Ready],
+  ([p0Ready, p1Ready]) => {
+    if (p0Ready && p1Ready) {
+      // Trigger overlay and pass destination
+      overlayStore.triggerBubbles({ name: ROUTE_NAME_GAME, params: { gameId: gameStore.id } });
+    }
+  },
+);
 
 // Router
 onBeforeRouteLeave((to, from, next) => {

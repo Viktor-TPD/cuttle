@@ -15,8 +15,7 @@ export const ROUTE_NAME_SIGNUP = 'Signup';
 export const ROUTE_NAME_STATS = 'Stats';
 
 const mustBeAuthenticated = async (to, from, next) => {
-
-  if([ 'discord' ].includes(to.query.oauthsignup)){
+  if (['discord'].includes(to.query.oauthsignup)) {
     return next();
   }
   const authStore = useAuthStore();
@@ -62,7 +61,10 @@ const checkAndSubscribeToLobby = async (to) => {
     }
     return true;
   } catch (err) {
-    return { name: 'Home', query: { gameId: gameId, error: err?.message ?? `Could not load game ${gameId}` } };
+    return {
+      name: 'Home',
+      query: { gameId: gameId, error: err?.message ?? `Could not load game ${gameId}` },
+    };
   }
 };
 
@@ -81,7 +83,10 @@ const getGameState = async (to) => {
       return { name: to.name, params: { gameId: response.game.rematchGame } };
     }
   } catch (err) {
-    return { name: 'Home', query: { gameId: gameId, error: err?.message ?? `Could not load game ${gameId}` } };
+    return {
+      name: 'Home',
+      query: { gameId: gameId, error: err?.message ?? `Could not load game ${gameId}` },
+    };
   }
   return;
 };
@@ -117,7 +122,10 @@ const setupSpectate = async (to) => {
       replace: true,
     };
   } catch (err) {
-    return { name: 'Home', query: { gameId: gameId, error: err?.message ?? err ?? `Could not spectate game ${gameId}` } };
+    return {
+      name: 'Home',
+      query: { gameId: gameId, error: err?.message ?? err ?? `Could not spectate game ${gameId}` },
+    };
   }
 };
 
@@ -132,7 +140,7 @@ const routes = [
     name: ROUTE_NAME_SPECTATE_LIST,
     path: '/spectate-list',
     component: () => import('@/routes/home/HomeView.vue'),
-    beforeEnter: mustBeAuthenticated
+    beforeEnter: mustBeAuthenticated,
   },
   {
     path: '/login/:lobbyRedirectId?',
