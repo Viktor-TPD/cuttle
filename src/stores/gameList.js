@@ -11,6 +11,9 @@ class GameSummary {
     this.status = Object.prototype.hasOwnProperty.call(obj, 'status') ? obj.status : GameStatus.ARCHIVED;
     this.isRanked = Object.prototype.hasOwnProperty.call(obj, 'isRanked') ? obj.isRanked : false;
     this.isOver = false;
+    this.timerEnabled = Object.prototype.hasOwnProperty.call(obj, 'timerEnabled') ? obj.timerEnabled : false;
+    this.timerType = Object.prototype.hasOwnProperty.call(obj, 'timerType') ? obj.timerType : 'turn';
+    this.timerDuration = Object.prototype.hasOwnProperty.call(obj, 'timerDuration') ? obj.timerDuration : 90;
   }
 }
 export const useGameListStore = defineStore('gameList', {
@@ -32,7 +35,7 @@ export const useGameListStore = defineStore('gameList', {
       if (gameIndex < 0 || gameIndex > this.openGames.length) {
         return;
       }
-      const [ startedGame ] = this.openGames.splice(gameIndex, 1);
+      const [startedGame] = this.openGames.splice(gameIndex, 1);
       startedGame.status = GameStatus.STARTED;
       this.spectateGames.push(startedGame);
     },
@@ -84,13 +87,22 @@ export const useGameListStore = defineStore('gameList', {
         });
       });
     },
-    requestCreateGame({ gameName, isRanked = false }) {
+    requestCreateGame({
+      gameName,
+      isRanked = false,
+      timerEnabled = false,
+      timerType = 'turn',
+      timerDuration = 90,
+    }) {
       return new Promise((resolve, reject) => {
         io.socket.post(
           '/api/game',
           {
             gameName,
             isRanked,
+            timerEnabled,
+            timerType,
+            timerDuration,
           },
           (resData, jwres) => {
             if (jwres.statusCode === 200) {
