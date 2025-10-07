@@ -76,7 +76,7 @@ const bubbleStyles = computed(() => {
     opacity: 1;
   }
   to {
-    transform: translateY(-120vh) scale(0.5);
+    transform: translateY(-150vh) scale(0.5);
     opacity: 0.7;
   }
 }
