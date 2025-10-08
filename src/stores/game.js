@@ -139,15 +139,16 @@ export const useGameStore = defineStore('game', () => {
   const playerWins = computed(() => gameIsOver.value && winnerPNum.value === myPNum.value);
   const resolvingSeven = computed(() => phase.value === GamePhase.RESOLVING_SEVEN);
   const isPlayersTurn = computed(() => turn.value % 2 === myPNum.value);
+
   const turnTimer = ref(30);
   let turnInterval = null;
+  const timerDuration = ref(0);
 
   watch(turn, (newTurn, oldTurn) => {
     console.log(`Turn changed from ${oldTurn} to ${newTurn}, resetting turn timer`);
     resetTurnTimer();
   });
 
-  // --- Reset turn timer ---
   function resetTurnTimer() {
     clearInterval(turnInterval);
 
@@ -155,32 +156,22 @@ export const useGameStore = defineStore('game', () => {
       return;
     }
 
-    turnTimer.value = 45;
+    timerDuration.value = 60;
 
-    // Start countdown
+    turnTimer.value = timerDuration.value;
+
     turnInterval = setInterval(async () => {
-      // Minska timer
       turnTimer.value--;
 
-      // Debug
-      console.log(`Turn timer: ${turnTimer.value} (Player turn: ${isPlayersTurn.value})`);
-
-      // Om tiden går ut
       if (turnTimer.value <= 0) {
         clearInterval(turnInterval);
 
-        // Kolla att det fortfarande är spelarens tur
         if (!isPlayersTurn.value) {
-          console.log('Turn expired but it is no longer your turn. Skipping auto-pass.');
           return;
         }
 
-        // Auto-pass
-        console.log('Turn expired, sending auto-pass...');
         try {
           await requestPass();
-          // requestPass kommer trigga en serverupdate som uppdaterar 'turn',
-          // resetTurnTimer kommer triggas automatiskt via watch
         } catch (err) {
           console.error('Error auto-passing:', err);
         }
@@ -188,7 +179,6 @@ export const useGameStore = defineStore('game', () => {
     }, 1000);
   }
 
-  // --- Stop timer när spelet är över ---
   watch(gameIsOver, (over) => {
     if (over) {
       clearInterval(turnInterval);
@@ -729,6 +719,7 @@ export const useGameStore = defineStore('game', () => {
     conceded,
     currentMatch,
     iWantToContinueSpectating,
+    timerDuration,
     turnTimer,
     status,
     // Getters

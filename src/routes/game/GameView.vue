@@ -67,6 +67,11 @@
             <UsernameToolTip id="opponent-username-container" :username="gameStore.opponentUsername" />
             <div class="opponent-cards-container">
               <div id="opponent-hand-cards" class="d-flex justify-center align-start">
+                <div
+                  v-show="!gameStore.isPlayersTurn"
+                  class="turn-timer-bar opponent"
+                  :style="{ width: `${(gameStore.turnTimer / gameStore.timerDuration) * 100}%` }"
+                />
                 <Transition name="slide-below" mode="out-in">
                   <TransitionGroup
                     v-if="showOpponentHand"
@@ -324,7 +329,6 @@
           :class="{ 'text-black': gameStore.isPlayersTurn, 'text-white': !gameStore.isPlayersTurn }"
         >
           {{ turnText }}
-          {{ `${gameStore.turnTimer}s` }}
         </span>
       </h3>
 
@@ -337,6 +341,11 @@
             class="user-cards-grid-container"
             :class="{ 'my-turn': gameStore.isPlayersTurn }"
           >
+            <div
+              v-show="gameStore.isPlayersTurn"
+              class="turn-timer-bar"
+              :style="{ width: `${(gameStore.turnTimer / gameStore.timerDuration) * 100}%` }"
+            />
             <UsernameToolTip
               v-if="$vuetify.display.smAndUp && !gameHistoryStore.showPlaybackControls"
               id="player-username-container"
@@ -1489,17 +1498,33 @@ export default {
     border-radius: 4px;
     transition: all 1s;
     &.my-turn {
-      border: 4px solid rgba(var(--v-theme-accent));
-      box-shadow:
-        0 15px 16px -12px rgba(0, 123, 59, 0.8),
-        0 24px 38px 12px rgba(0, 123, 59, 0.8),
-        0 10px 50px 16px rgba(33, 150, 83, 0.8) !important;
+      border: none;
+      box-shadow: 0 0 20px rgba(0, 255, 100, 0.4);
       background: linear-gradient(0deg, rgba(253, 98, 34, 1), rgba(255, 255, 255, 0.3));
     }
     &:not(.my-turn) {
       border: 4px solid transparent;
     }
   }
+}
+
+.turn-timer-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 6px;
+  width: 100%;
+  background: linear-gradient(to right, #00ff64, #ffcc00);
+  border-top-left-radius: 4px;
+  border-top-right-radius: 4px;
+  transition: width 1s linear;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.turn-timer-bar.opponent {
+  top: auto;
+  bottom: 0;
 }
 
 .user-cards-grid-container {
