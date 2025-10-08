@@ -1,24 +1,5 @@
-<template>
-  <v-menu
-    v-model="internalShow"
-    v-bind="$attrs"
-  >
-    <template #activator="{ props }">
-      <slot name="activator" :props="props" />
-    </template>
-
-    <v-list
-      bg-color="surface-2"
-      base-color="surface-1"
-      v-bind="listProps"
-    >
-      <slot />
-    </v-list>
-  </v-menu>
-</template>
-
 <script setup>
-import { computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 
 defineOptions({
   inheritAttrs: false
@@ -37,11 +18,17 @@ const props = defineProps({
 
 const emit = defineEmits(['update:modelValue']);
 
-const internalShow = computed({
-  get: () => props.modelValue,
+// Internal state for uncontrolled usage
+const internalState = ref(false);
+
+// Use internal state when modelValue is not provided
+const menuState = computed({
+  get: () => props.modelValue !== undefined ? props.modelValue : internalState.value,
   set: (value) => {
     if (props.modelValue !== undefined) {
       emit('update:modelValue', value);
+    } else {
+      internalState.value = value;
     }
   }
 });

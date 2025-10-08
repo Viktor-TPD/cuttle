@@ -1,37 +1,25 @@
 <template>
-  <div>
-    <v-btn id="rules-button" icon variant="text" aria-label="Show Rules" title="Show Rules" @click="openDialog">
-      <v-icon color="neutral-lighten-2" icon="mdi-information" aria-hidden="true"></v-icon>
-
-      <RulesDialog v-model="showDialog" @open="onOpen" @close="onClose"></RulesDialog>
-    </v-btn>
-  </div>
+  <v-btn 
+    id="rules-button" 
+    icon 
+    variant="text" 
+    aria-label="Show Rules" 
+    title="Show Rules" 
+    @click="showDialog = true"
+  >
+    <v-icon color="neutral-lighten-2" icon="mdi-information" aria-hidden="true" />
+    
+    <RulesDialog v-model="showDialog" @close="showDialog = false" />
+  </v-btn>
 </template>
 
-<script>
+<script setup>
+import { ref } from 'vue';
 import RulesDialog from './dialogs/components/RulesDialog.vue';
 
-export default {
-  name: 'RulesButton',
-  components: { RulesDialog },
-  data() {
-    return {
-      showDialog: false,
-    };
-  },
-  methods: {
-    openDialog() {
-      this.showDialog = true;
-    },
-    onOpen() {
-      this.$emit('open');
-    },
-    onClose() {
-      this.showDialog = false;
-      this.$emit('close');
-    },
-  },
-};
+const showDialog = ref(false);
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+/* No styles needed, but keeping the section for consistency */
+</style>
