@@ -1,7 +1,6 @@
 <template>
   <div>
-    <v-menu v-model="showGameMenu">
-      <!-- Activator -->
+    <BaseMenu v-model="showGameMenu">
       <template #activator="{ props }">
         <v-btn
           id="game-menu-activator"
@@ -15,53 +14,55 @@
           <v-icon color="neutral-lighten-2" icon="mdi-cog" aria-hidden="true" />
         </v-btn>
       </template>
-      <!-- Menu -->
-      <v-list id="game-menu" class="text-surface-1" bg-color="surface-2">
-        <!-- Stop Spectating -->
-        <v-list-item
-          v-if="isSpectating"
-          data-cy="stop-spectating"
-          prepend-icon="mdi-home"
-          @click.stop="stopSpectate"
-        >
-          {{ t('game.menus.gameMenu.home') }}
-        </v-list-item>
-        <!-- Concede Dialog (Initiate + Confirm) -->
-        <template v-else>
-          <v-list-item
-            data-cy="concede-initiate"
-            prepend-icon="mdi-flag-variant-outline"
-            @click="shownDialog = 'concede'"
-          >
-            {{ t('game.menus.gameMenu.concede') }}
-          </v-list-item>
-          <v-list-item
-            data-cy="stalemate-initiate"
-            prepend-icon="mdi-handshake"
-            @click="shownDialog = 'stalemate'"
-          >
-            {{ t('game.menus.gameMenu.stalemate') }}
-          </v-list-item>
-        </template>
-        <v-list-item
-          v-if="!clipCopiedToClipboard"
-          data-cy="clip-highlight"
-          prepend-icon="mdi-movie-open"
-          @click.stop="clipHighlight"
-        >
-          {{ t('game.menus.gameMenu.clipHighlight') }}
-        </v-list-item>
-        <v-list-item v-else data-cy="highlight-copied" prepend-icon="mdi-check-bold">
-          {{ t('game.menus.gameMenu.highlightCopied') }}
-        </v-list-item>
-        <TheLanguageSelector />
-        <v-list-item data-cy="refresh" prepend-icon="mdi-refresh" @click="refresh">
-          {{ t('game.menus.gameMenu.refresh') }}
-        </v-list-item>
-      </v-list>
-    </v-menu>
 
-    <BaseDialog id="request-gameover-dialog" v-model="showEndGameDialog" :title="dialogTitle">
+      <!-- Stop Spectating -->
+      <v-list-item
+        v-if="isSpectating"
+        data-cy="stop-spectating"
+        prepend-icon="mdi-home"
+        @click.stop="stopSpectate"
+      >
+        {{ t('game.menus.gameMenu.home') }}
+      </v-list-item>
+      <!-- Concede Dialog (Initiate + Confirm) -->
+      <template v-else>
+        <v-list-item
+          data-cy="concede-initiate"
+          prepend-icon="mdi-flag-variant-outline"
+          @click="shownDialog = 'concede'"
+        >
+          {{ t('game.menus.gameMenu.concede') }}
+        </v-list-item>
+        <v-list-item
+          data-cy="stalemate-initiate"
+          prepend-icon="mdi-handshake"
+          @click="shownDialog = 'stalemate'"
+        >
+          {{ t('game.menus.gameMenu.stalemate') }}
+        </v-list-item>
+      </template>
+      <v-list-item
+        v-if="!clipCopiedToClipboard"
+        data-cy="clip-highlight"
+        prepend-icon="mdi-movie-open"
+        @click.stop="clipHighlight"
+      >
+        {{ t('game.menus.gameMenu.clipHighlight') }}
+      </v-list-item>
+      <v-list-item v-else data-cy="highlight-copied" prepend-icon="mdi-check-bold">
+        {{ t('game.menus.gameMenu.highlightCopied') }}
+      </v-list-item>
+      <TheLanguageSelector />
+      <v-list-item data-cy="refresh" prepend-icon="mdi-refresh" @click="refresh">
+        {{ t('game.menus.gameMenu.refresh') }}
+      </v-list-item>
+    </BaseMenu>
+
+    <BaseDialog
+      id="request-gameover-dialog"
+      v-model="showEndGameDialog"
+      :title="dialogTitle"
+    >
       <template #body>
         <p class="pt-4 pb-8">
           {{ dialogText }}
@@ -100,11 +101,14 @@ import { useAuthStore } from '@/stores/auth';
 import { useGameStore } from '@/stores/game';
 import { useGameHistoryStore } from '@/stores/gameHistory';
 import BaseDialog from '@/components/BaseDialog.vue';
+import BaseMenu from '@/components/BaseMenu.vue';
 import TheLanguageSelector from '@/components/TheLanguageSelector.vue';
+
 export default {
   name: 'GameMenu',
   components: {
     BaseDialog,
+    BaseMenu,
     TheLanguageSelector,
   },
   props: {

@@ -1,7 +1,7 @@
 <template>
   <span>
     <span class="ml-4" :data-cy="dataCyName"> {{ $t('game.score.goal') }}: {{ pointsToWin }} </span>
-    <v-menu :location="isPlayer ? 'top' : 'bottom'">
+    <BaseMenu :location="isPlayer ? 'top' : 'bottom'" :list-props="{ class: 'score-goal-explanation' }">
       <template #activator="{ props }">
         <v-btn
           class="mb-2"
@@ -19,28 +19,31 @@
           />
         </v-btn>
       </template>
-      <v-list class="score-goal-explanation">
-        <v-list-item 
-          v-for="(explanation, index) in kingsPoints" 
-          :key="index" 
-          :class="{ 'current-goal': kingCount === index }"
-        >
-          {{ explanation }}
-        </v-list-item>
-      </v-list>
-    </v-menu>
+
+      <v-list-item 
+        v-for="(explanation, index) in kingsPoints" 
+        :key="index" 
+        :class="{ 'current-goal': kingCount === index }"
+      >
+        {{ explanation }}
+      </v-list-item>
+    </BaseMenu>
   </span>
 </template>
 
 <script>
 import { useI18n } from 'vue-i18n';
+import BaseMenu from '@/components/BaseMenu.vue';
 
 export default {
   name: 'ScoreGoalTooltip',
+  components: {
+    BaseMenu,
+  },
   props: {
     kingCount: {
       required: true,
-      type: Number, // 0-4
+      type: Number,
     },
     pointsToWin: {
       required: true,

@@ -55,15 +55,12 @@ const sortedLocales = computed(() => {
   });
 });
 
-
 const activatorClass = computed(() => props.variant === 'dark' ? `bg-surface-2 text-surface-1` : '');
 
 const icons = computed(() => props.hasChevron ? { prepend: 'mdi-web', append: 'mdi-chevron-right' } : { prepend: 'mdi-web mr-2', append: '' });
-
 
 const changeLocale = (lang) => {
   locale.value = lang;
   setLocalStorage('preferredLocale', lang);
 };
 </script>
-
