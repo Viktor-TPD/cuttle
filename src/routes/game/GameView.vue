@@ -222,6 +222,7 @@
                     :suit="card.suit"
                     :rank="card.rank"
                     :is-valid-target="validMoves.includes(card.id)"
+                    :is-field-card="true"
                     :data-opponent-point-card="`${card.rank}-${card.suit}`"
                     controlled-by="opponent"
                     :scuttled-by="card.scuttledBy"
@@ -235,6 +236,7 @@
                       :rank="jack.rank"
                       :is-jack="true"
                       :is-valid-target="validMoves.includes(jack.id)"
+                      :is-field-card="true"
                       :data-opponent-face-card="`${jack.rank}-${jack.suit}`"
                       @click="targetOpponentFaceCard(-index - 1)"
                     />
@@ -249,6 +251,7 @@
                   :rank="card.rank"
                   :is-glasses="card.rank === 8"
                   :is-valid-target="validMoves.includes(card.id)"
+                  :is-field-card="true"
                   :data-opponent-face-card="`${card.rank}-${card.suit}`"
                   class="transition-all"
                   @click="targetOpponentFaceCard(index)"
@@ -267,6 +270,7 @@
                     :suit="card.suit"
                     :rank="card.rank"
                     :jacks="card.attachments"
+                    :is-field-card="true"
                     :data-player-point-card="`${card.rank}-${card.suit}`"
                     :scuttled-by="card.scuttledBy"
                     controlled-by="player"
@@ -278,6 +282,7 @@
                       :suit="jack.suit"
                       :rank="jack.rank"
                       :is-jack="true"
+                      :is-field-card="true"
                       :data-player-face-card="`${jack.rank}-${jack.suit}`"
                     />
                   </div>
@@ -290,6 +295,7 @@
                   :suit="card.suit"
                   :rank="card.rank"
                   :is-glasses="card.rank === 8"
+                  :is-field-card="true"
                   :data-player-face-card="`${card.rank}-${card.suit}`"
                   class="transition-all"
                 />

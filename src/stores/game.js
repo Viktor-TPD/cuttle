@@ -90,6 +90,9 @@ export const useGameStore = defineStore('game', () => {
   const oneOff = ref(null);
   const oneOffTarget = ref(null);
   const isRanked = ref(false);
+  const timerEnabled = ref(false);
+  const timerType = ref('turn');
+  const timerDuration = ref(90);
   const showIsRankedChangedAlert = ref(false);
   // Threes
   const lastEventCardChosen = ref(null);
@@ -142,7 +145,6 @@ export const useGameStore = defineStore('game', () => {
 
   const turnTimer = ref(30);
   let turnInterval = null;
-  const timerDuration = ref(0);
 
   watch(turn, (newTurn, oldTurn) => {
     console.log(`Turn changed from ${oldTurn} to ${newTurn}, resetting turn timer`);
@@ -272,6 +274,9 @@ export const useGameStore = defineStore('game', () => {
     oneOff.value = createGameCard(newGame.oneOff) ?? null;
     oneOffTarget.value = createGameCard(newGame.oneOffTarget) ?? null;
     isRanked.value = newGame.isRanked ?? isRanked.value;
+    timerEnabled.value = newGame.timerEnabled ?? timerEnabled.value;
+    timerType.value = newGame.timerType ?? timerType.value;
+    timerDuration.value = newGame.timerDuration ?? timerDuration.value;
     currentMatch.value = newGame.currentMatch ?? currentMatch.value;
     p0Rematch.value = newGame.p0Rematch ?? null;
     p1Rematch.value = newGame.p1Rematch ?? null;
@@ -311,6 +316,9 @@ export const useGameStore = defineStore('game', () => {
     oneOff.value = null;
     oneOffTarget.value = null;
     isRanked.value = false;
+    timerEnabled.value = false;
+    timerType.value = 'turn';
+    timerDuration.value = 90;
     showIsRankedChangedAlert.value = false;
     lastEventCardChosen.value = null;
     lastEventPlayerChoosing.value = false;
@@ -706,6 +714,9 @@ export const useGameStore = defineStore('game', () => {
     oneOff,
     oneOffTarget,
     isRanked,
+    timerEnabled,
+    timerType,
+    timerDuration,
     showIsRankedChangedAlert,
     lastEventCardChosen,
     lastEventPlayerChoosing,

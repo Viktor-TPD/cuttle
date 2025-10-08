@@ -49,6 +49,54 @@
           variant="outlined"
           data-cy="game-name-input"
         />
+
+        <v-divider class="my-4" />
+
+        <v-switch
+          v-model="timerSettings.enabled"
+          :label="timerSettings.enabled ? 'Timer: Enabled' : 'Timer: Disabled'"
+          data-cy="timer-enabled-switch"
+          color="surface-2"
+        />
+        <v-expand-transition>
+          <div v-if="timerSettings.enabled" class="mt-4">
+            <v-radio-group v-model="timerSettings.type" label="Timer Type" data-cy="timer-type-group">
+              <v-radio :value="TIMER_TYPES.TURN" label="Turn Timer" data-cy="timer-type-turn">
+                <template #label>
+                  <div>
+                    <strong>Turn Timer</strong>
+                    <div class="text-caption ml-2">Each turn gets a fresh countdown</div>
+                  </div>
+                </template>
+              </v-radio>
+
+              <v-radio :value="TIMER_TYPES.CHESS" label="Chess Timer" disabled data-cy="timer-type-chess">
+                <template #label>
+                  <div>
+                    <strong>Chess Timer</strong>
+                    <div class="text-caption ml-2">Coming soon! Each player has their own clock</div>
+                  </div>
+                </template>
+              </v-radio>
+            </v-radio-group>
+
+            <v-radio-group v-model="timerSettings.duration" label="Duration" data-cy="timer-duration-group">
+              <v-radio
+                v-for="preset in TIMER_PRESETS"
+                :key="preset.key"
+                :value="preset.value"
+                :data-cy="`timer-preset-${preset.key.toLowerCase()}`"
+              >
+                <template #label>
+                  <div>
+                    <strong>{{ preset.label }}</strong>
+                    <span class="text-caption ml-2">({{ formatTime(preset.value) }})</span>
+                  </div>
+                </template>
+              </v-radio>
+            </v-radio-group>
+          </div>
+        </v-expand-transition>
       </v-form>
     </template>
     <template #actions>
@@ -83,14 +131,22 @@ import { useI18n } from 'vue-i18n';
 import BaseDialog from '@/components/BaseDialog.vue';
 import StatsScoringDialog from '@/components/StatsScoringDialog.vue';
 import { getLocalStorage, setLocalStorage, LS_PREFERS_RANKED_NAME } from '_/utils/local-storage-utils.js';
+import { UseGameTimer } from '_/src/composables/useGameTimer';
 
 export default {
   name: 'CreateGameDialog',
   components: { StatsScoringDialog, BaseDialog },
-  emits: [ 'error' ],
+  emits: ['error'],
   setup() {
     const { t } = useI18n();
-    return { t };
+    const { TIMER_TYPES, TIMER_PRESETS, getDefaultSettings, formatTime } = UseGameTimer();
+    return {
+      t,
+      TIMER_TYPES,
+      TIMER_PRESETS,
+      getDefaultSettings,
+      formatTime,
+    };
   },
   data() {
     return {
@@ -98,6 +154,7 @@ export default {
       gameName: '',
       loading: false,
       isRanked: false,
+      timerSettings: this.getDefaultSettings(),
     };
   },
   computed: {
@@ -118,6 +175,9 @@ export default {
         .requestCreateGame({
           gameName: this.gameName,
           isRanked: this.isRanked,
+          timerEnabled: this.timerSettings.enabled,
+          timerType: this.timerSettings.type,
+          timerDuration: this.timerSettings.duration,
         })
         .then((res) => {
           const { gameId } = res;
@@ -129,6 +189,7 @@ export default {
       this.gameName = '';
       this.loading = false;
       this.show = false;
+      this.timerSettings = this.getDefaultSettings();
     },
     handleError(err) {
       this.$emit('error', err);

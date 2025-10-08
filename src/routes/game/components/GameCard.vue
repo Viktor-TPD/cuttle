@@ -1,53 +1,71 @@
 <template>
-  <v-card
-    class="mx-1 player-card"
-    :class="{
-      selected: isSelected,
-      glasses: isGlasses,
-      jack: isJack,
-      frozen: isFrozen,
-    }"
-    :elevation="elevation"
-  >
-    <v-icon
-      v-if="isFrozen"
-      class="player-card-icon mr-1 mt-1"
-      color="#00a5ff"
-      icon="mdi-snowflake"
-      aria-label="snowflake icon (card is frozen)"
-      aria-hidden="false"
-      role="img"
-    />
-    <v-overlay
-      :model-value="isValidTarget"
-      contained
-      class="valid-move target-overlay"
-    />
-    <Transition :name="scuttledByTransition">
-      <template v-if="scuttledBy">
-        <img :class="scuttledByClass" :src="`/img/cards/card-${scuttledBy.suit}-${scuttledBy.rank}.svg`">
+  <div class="card-wrapper">
+    <v-card
+      class="mx-1 player-card"
+      :class="{
+        selected: isSelected,
+        glasses: isGlasses,
+        jack: isJack,
+        frozen: isFrozen,
+      }"
+      :elevation="elevation"
+    >
+      <v-icon
+        v-if="isFrozen"
+        class="player-card-icon mr-1 mt-1"
+        color="#00a5ff"
+        icon="mdi-snowflake"
+        aria-label="snowflake icon (card is frozen)"
+        aria-hidden="false"
+        role="img"
+      />
+      <v-overlay :model-value="isValidTarget" contained class="valid-move target-overlay" />
+      <Transition :name="scuttledByTransition">
+        <template v-if="scuttledBy">
+          <img :class="scuttledByClass" :src="`/img/cards/card-${scuttledBy.suit}-${scuttledBy.rank}.svg`" />
+        </template>
+      </Transition>
+      <Transition name="card-flip">
+        <img
+          v-if="isGlasses"
+          :src="`/img/cards/glasses-${suitName.toLowerCase()}.png`"
+          :alt="`Glasses - $${cardName}`"
+        />
+        <img v-else-if="isBack" src="/img/cards/card-back.png" class="opponent-card-back" alt="card back" />
+        <img v-else :src="`/img/cards/card-${suit}-${rank}.svg`" :alt="cardName" class="face-card" />
+      </Transition>
+    </v-card>
+
+    <!-- Tooltip that appears on hover for opponent cards -->
+    <v-menu
+      v-if="isFieldCard && !isBack"
+      v-model="showTooltip"
+      :open-on-hover="true"
+      :close-delay="200"
+      location="top"
+    >
+      <template #activator="{ props }">
+        <v-btn
+          v-bind="props"
+          class="card-info-button"
+          icon
+          size="x-small"
+          variant="elevated"
+          color="primary"
+          @click.stop
+        >
+          <v-icon size="small">mdi-information</v-icon>
+        </v-btn>
       </template>
-    </Transition>
-    <Transition name="card-flip">
-      <img
-        v-if="isGlasses"
-        :src="`/img/cards/glasses-${suitName.toLowerCase()}.png`"
-        :alt="`Glasses - $${cardName}`"
-      >
-      <img
-        v-else-if="isBack"
-        src="/img/cards/card-back.png"
-        class="opponent-card-back"
-        alt="card back"
-      >
-      <img
-        v-else
-        :src="`/img/cards/card-${suit}-${rank}.svg`"
-        :alt="cardName"
-        class="face-card"
-      >
-    </Transition>
-  </v-card>
+
+      <v-card class="card-effect-tooltip">
+        <v-card-title class="text-subtitle-2">{{ cardName }}</v-card-title>
+        <v-card-text class="text-body-2">
+          {{ cardEffect }}
+        </v-card-text>
+      </v-card>
+    </v-menu>
+  </div>
 </template>
 
 <script>
@@ -93,12 +111,21 @@ export default {
     controlledBy: {
       type: String,
       default: '',
-      validator: (val) => [ '', 'player', 'opponent' ].includes(val),
+      validator: (val) => ['', 'player', 'opponent'].includes(val),
     },
     highElevation: {
       type: Boolean,
       default: false,
     },
+    isFieldCard: {
+      type: Boolean,
+      default: false,
+    },
+  },
+  data() {
+    return {
+      showTooltip: false,
+    };
   },
   computed: {
     suitName() {
@@ -150,6 +177,22 @@ export default {
     cardName() {
       return `${this.rankName} of ${this.suitName}`;
     },
+    cardEffect() {
+      if (this.rank <= 10) {
+        return `Worth ${this.rank} point${this.rank !== 1 ? 's' : ''}`;
+      }
+
+      switch (this.rank) {
+        case 11:
+          return 'Steal a points card from an opponent';
+        case 12:
+          return 'Protect your royal cards from being targeted';
+        case 13:
+          return 'Reduce points needed to win';
+        default:
+          return '';
+      }
+    },
     elevation() {
       if (this.isGlasses) {
         return '0';
@@ -185,7 +228,13 @@ export default {
   },
 };
 </script>
+
 <style scoped lang="scss">
+.card-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
 .player-card {
   position: relative;
   max-height: 20vh;
@@ -220,12 +269,32 @@ export default {
     }
   }
 }
+
+.card-info-button {
+  position: absolute;
+  top: -1rem;
+  right: -1rem;
+  z-index: 3;
+  opacity: 0;
+  transition: opacity 0.2s;
+  pointer-events: auto;
+}
+
+.card-wrapper:hover .card-info-button {
+  opacity: 1;
+}
+
+.card-effect-tooltip {
+  max-width: 250px;
+}
+
 .player-card-icon {
   position: absolute;
   top: 0;
   right: 0;
   z-index: 1;
 }
+
 .opponent-card-back {
   border-radius: 5px;
 }
@@ -236,6 +305,7 @@ export default {
     border-radius: 10px;
   }
 }
+
 .jack {
   height: 50%;
   margin-bottom: -50%;
@@ -252,10 +322,11 @@ export default {
     position: relative;
   }
 }
+
 .target-overlay {
   cursor: pointer;
   background-color: rgb(var(--v-theme-accent-lighten1));
-  opacity: .6;
+  opacity: 0.6;
 }
 
 .frozen {
@@ -295,13 +366,13 @@ export default {
   transform: translateY(-32px);
 }
 
-.card-flip-enter-active{
+.card-flip-enter-active {
   transition: all 1s;
 }
-.card-flip-enter-from{
+.card-flip-enter-from {
   transform: rotateY(-90deg);
 }
-.card-flip-enter-to{
+.card-flip-enter-to {
   transform: rotateY(0deg);
 }
 
