@@ -68,9 +68,15 @@
             <div class="opponent-cards-container">
               <div id="opponent-hand-cards" class="d-flex justify-center align-start">
                 <div
-                  v-show="!gameStore.isPlayersTurn"
+                  v-show="!gameStore.isPlayersTurn && gameStore.timerEnabled"
                   class="turn-timer-bar opponent"
-                  :style="{ width: `${(gameStore.turnTimer / gameStore.timerDuration) * 100}%` }"
+                  :style="{
+                    width: `${(gameStore.turnTimer / gameStore.timerDuration) * 100}%`,
+                    background:
+                      gameStore.turnTimer <= 15
+                        ? 'linear-gradient(to right, #ff0000, #ff5500)'
+                        : 'linear-gradient(to right, #00ff64, #ffcc00)',
+                  }"
                 />
                 <Transition name="slide-below" mode="out-in">
                   <TransitionGroup
@@ -348,9 +354,15 @@
             :class="{ 'my-turn': gameStore.isPlayersTurn }"
           >
             <div
-              v-show="gameStore.isPlayersTurn"
+              v-show="gameStore.isPlayersTurn && gameStore.timerEnabled"
               class="turn-timer-bar"
-              :style="{ width: `${(gameStore.turnTimer / gameStore.timerDuration) * 100}%` }"
+              :style="{
+                width: `${(gameStore.turnTimer / gameStore.timerDuration) * 100}%`,
+                background:
+                  gameStore.turnTimer <= 10
+                    ? 'linear-gradient(to right, #ff0000, #ff5500)' // röd när lite tid kvar
+                    : 'linear-gradient(to right, #00ff64, #ffcc00)', // annars grön/gul
+              }"
             />
             <UsernameToolTip
               v-if="$vuetify.display.smAndUp && !gameHistoryStore.showPlaybackControls"

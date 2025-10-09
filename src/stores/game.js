@@ -143,7 +143,7 @@ export const useGameStore = defineStore('game', () => {
   const resolvingSeven = computed(() => phase.value === GamePhase.RESOLVING_SEVEN);
   const isPlayersTurn = computed(() => turn.value % 2 === myPNum.value);
 
-  const turnTimer = ref(30);
+  const turnTimer = ref(0);
   let turnInterval = null;
 
   watch(turn, (newTurn, oldTurn) => {
@@ -154,11 +154,16 @@ export const useGameStore = defineStore('game', () => {
   function resetTurnTimer() {
     clearInterval(turnInterval);
 
-    if (gameIsOver.value) {
+    timerEnabled.value = true;
+
+    if (gameIsOver.value || !timerEnabled.value) {
+      console.log('Timer not started, either game over or timer disabled', {
+        gameIsOver: gameIsOver.value,
+        timerEnabled: timerEnabled.value,
+        timerDuration: timerDuration.value,
+      });
       return;
     }
-
-    timerDuration.value = 60;
 
     turnTimer.value = timerDuration.value;
 
@@ -285,6 +290,8 @@ export const useGameStore = defineStore('game', () => {
     status.value = newGame.status ?? GameStatus.ARCHIVED;
     phase.value = newGame.phase ?? GamePhase.MAIN;
     gameHistoryStore.gameStates = newGame.gameStates ?? [];
+
+    console.log(newGame.timerEnabled, newGame.timerDuration);
 
     resetTurnTimer();
   }
