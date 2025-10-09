@@ -340,7 +340,7 @@
           class="ml-2"
           :class="{ 'text-black': gameStore.isPlayersTurn, 'text-white': !gameStore.isPlayersTurn }"
         >
-          {{ turnText }}
+          {{ turnText }} {{ gameStore.timerEnabled ? ` - ${gameStore.turnTimer}s` : '' }}
         </span>
       </h3>
 

@@ -154,8 +154,6 @@ export const useGameStore = defineStore('game', () => {
   function resetTurnTimer() {
     clearInterval(turnInterval);
 
-    timerEnabled.value = true;
-
     if (gameIsOver.value || !timerEnabled.value) {
       console.log('Timer not started, either game over or timer disabled', {
         gameIsOver: gameIsOver.value,
@@ -486,6 +484,11 @@ export const useGameStore = defineStore('game', () => {
   function requestGameState(gameId, gameStateIndex = -1, route = null) {
     return new Promise((resolve, reject) => {
       io.socket.get(`/api/game/${gameId}?gameStateIndex=${gameStateIndex}`, (res, jwres) => {
+        console.log('📡 requestGameState response:', {
+          timerEnabled: res.game?.timerEnabled,
+          timerType: res.game?.timerType,
+          timerDuration: res.game?.timerDuration,
+        });
         switch (jwres.statusCode) {
           case 200:
             resetState();
