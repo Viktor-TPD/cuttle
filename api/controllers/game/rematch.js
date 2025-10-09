@@ -6,7 +6,6 @@
  * New game will be ranked/casual based on previous match
  * with name "firstPlayerUsername VS secondPlayerUsername {p0wins}-{p1Wins}-{stalemates}"
  */
-import { useGameStore } from '_/src/stores/game';
 
 const GameStatus = require('../../../utils/GameStatus.json');
 const CustomErrorType = require('../../errors/customErrorType');
