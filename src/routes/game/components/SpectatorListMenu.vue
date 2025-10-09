@@ -1,6 +1,5 @@
 <template>
-  <v-menu v-model="spectatingMenu">
-    <!-- Activator -->
+  <BaseMenu v-model="spectatingMenu">
     <template #activator="{ props }">
       <v-btn
         id="spectating-menu-activator"
@@ -10,41 +9,33 @@
         icon
         variant="text"
         aria-label="View current spectators"
+        title="View current spectators"
       >
-        <v-icon
-          class="mr-1"
-          icon="mdi-eye-outline"
-          size="large"
-          aria-hidden="true"   
-        />
-        <span v-if="!$vuetify.display.xs" class="pr-2">{{ spectatingUsers.length }}</span>
+        <v-icon class="mr-1" icon="mdi-eye-outline" size="large" aria-hidden="true" />
       </v-btn>
     </template>
-    <!-- Menu -->
-    <v-list
-      id="spectatorList"
-      class="pl-2 pr-2"
-      bg-color="surface-2"
-      color="surface-1"
-      data-cy="spectate-list-menu"
-    >
-      <v-list-item-title v-if="spectatingUsers.length > 0">
-        {{ `${t('game.menus.spectatorListMenu.spectators')}` }}
-      </v-list-item-title>
-      <v-list-item-title v-else>
-        {{ `${t('game.menus.spectatorListMenu.noSpectators')}` }}
-      </v-list-item-title>
-      <v-list-item v-for="spectator in spectatingUsers" :key="spectator">
-        {{ spectator }}
-      </v-list-item>
-    </v-list>
-  </v-menu>
+
+    <v-list-item-title v-if="spectatingUsers.length > 0" class="pl-2 pr-2">
+      {{ `${t('game.menus.spectatorListMenu.spectators')}` }}
+    </v-list-item-title>
+    <v-list-item-title v-else class="pl-2 pr-2">
+      {{ `${t('game.menus.spectatorListMenu.noSpectators')}` }}
+    </v-list-item-title>
+    <v-list-item v-for="spectator in spectatingUsers" :key="spectator">
+      {{ spectator }}
+    </v-list-item>
+  </BaseMenu>
 </template>
 
 <script>
 import { useI18n } from 'vue-i18n';
+import BaseMenu from '@/components/BaseMenu.vue';
 
 export default {
+  name: 'SpectatorListMenu',
+  components: {
+    BaseMenu,
+  },
   props: {
     spectatingUsers: {
       type: Array,

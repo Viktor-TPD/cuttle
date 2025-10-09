@@ -7,19 +7,21 @@
 
     <!-- Authenticated View -->
     <template v-else>
-      <div id="game-menu-wrapper" class="d-flex flex-column flex-sm-row align-center" :style="menuWrapperStyle">
-        <SpectatorListMenu :spectating-users="spectatingUsers" :vuetify-display="$vuetify" />
-        <GameMenu :is-spectating="isSpectating" @handle-error="handleError" />
-        <v-icon
-          v-if="$vuetify.display.xs"
-          color="white"
-          icon="mdi-account-clock"
-          size="large"
-          aria-label="Show game history"
-          aria-hidden="false"
-          role="button"
-          @click.stop="showHistoryDrawer = !showHistoryDrawer"
-        />
+      <div id="game-menu-wrapper" class="d-flex flex-col flex-sm-row align-center" :style="menuWrapperStyle">
+        <ul class="menu-icon-list">
+          <SpectatorListMenu :spectating-users="spectatingUsers" :vuetify-display="$vuetify" />
+          <RulesMenuButton></RulesMenuButton>
+          <GameMenu :is-spectating="isSpectating" @handle-error="handleError" />
+          <v-icon
+            color="white"
+            icon="mdi-account-clock"
+            size="large"
+            aria-label="Show game history"
+            aria-hidden="false"
+            role="button"
+            @click.stop="showHistoryDrawer = !showHistoryDrawer"
+          />
+        </ul>
       </div>
 
       <!-- Mobile History Drawer -->
@@ -35,7 +37,7 @@
             <template #append>
               <v-btn icon variant="text" @click.stop="showHistoryDrawer = !showHistoryDrawer">
                 <v-icon
-                  color="neutral"
+                  color="black"
                   icon="mdi-window-close"
                   size="large"
                   aria-label="window close icon"
@@ -65,6 +67,17 @@
             <UsernameToolTip id="opponent-username-container" :username="gameStore.opponentUsername" />
             <div class="opponent-cards-container">
               <div id="opponent-hand-cards" class="d-flex justify-center align-start">
+                <div
+                  v-show="!gameStore.isPlayersTurn && gameStore.timerEnabled"
+                  class="turn-timer-bar opponent"
+                  :style="{
+                    width: `${(gameStore.turnTimer / gameStore.timerDuration) * 100}%`,
+                    background:
+                      gameStore.turnTimer <= 15
+                        ? 'linear-gradient(to right, #ff0000, #ff5500)'
+                        : 'linear-gradient(to right, #00ff64, #ffcc00)',
+                  }"
+                />
                 <Transition name="slide-below" mode="out-in">
                   <TransitionGroup
                     v-if="showOpponentHand"
@@ -108,7 +121,7 @@
                     class="opponent-hand-wrapper transition-all"
                   >
                     <GameCard
-                      v-for="(card) in gameStore.opponent.hand"
+                      v-for="card in gameStore.opponent.hand"
                       :key="card.id"
                       :suit="isBeingDiscarded(card) ? card.suit : undefined"
                       :rank="isBeingDiscarded(card) ? card.rank : undefined"
@@ -143,9 +156,7 @@
             @click="drawCard"
           >
             <template v-if="!gameStore.resolvingSeven">
-              <v-card-actions class="c-deck-count">
-                ({{ deckLength }})
-              </v-card-actions>
+              <v-card-actions class="c-deck-count"> ({{ deckLength }}) </v-card-actions>
               <h1 v-if="deckLength === 0" id="empty-deck-text">
                 {{ t('game.pass') }}
               </h1>
@@ -217,6 +228,7 @@
                     :suit="card.suit"
                     :rank="card.rank"
                     :is-valid-target="validMoves.includes(card.id)"
+                    :is-field-card="true"
                     :data-opponent-point-card="`${card.rank}-${card.suit}`"
                     controlled-by="opponent"
                     :scuttled-by="card.scuttledBy"
@@ -230,6 +242,7 @@
                       :rank="jack.rank"
                       :is-jack="true"
                       :is-valid-target="validMoves.includes(jack.id)"
+                      :is-field-card="true"
                       :data-opponent-face-card="`${jack.rank}-${jack.suit}`"
                       @click="targetOpponentFaceCard(-index - 1)"
                     />
@@ -244,6 +257,7 @@
                   :rank="card.rank"
                   :is-glasses="card.rank === 8"
                   :is-valid-target="validMoves.includes(card.id)"
+                  :is-field-card="true"
                   :data-opponent-face-card="`${card.rank}-${card.suit}`"
                   class="transition-all"
                   @click="targetOpponentFaceCard(index)"
@@ -262,6 +276,7 @@
                     :suit="card.suit"
                     :rank="card.rank"
                     :jacks="card.attachments"
+                    :is-field-card="true"
                     :data-player-point-card="`${card.rank}-${card.suit}`"
                     :scuttled-by="card.scuttledBy"
                     controlled-by="player"
@@ -273,6 +288,7 @@
                       :suit="jack.suit"
                       :rank="jack.rank"
                       :is-jack="true"
+                      :is-field-card="true"
                       :data-player-face-card="`${jack.rank}-${jack.suit}`"
                     />
                   </div>
@@ -285,6 +301,7 @@
                   :suit="card.suit"
                   :rank="card.rank"
                   :is-glasses="card.rank === 8"
+                  :is-field-card="true"
                   :data-player-face-card="`${card.rank}-${card.suit}`"
                   class="transition-all"
                 />
@@ -294,27 +311,22 @@
         </div>
       </div>
 
-      <!-- History -->
-      <div v-if="$vuetify.display.smAndUp" class="history-container">
-        <div id="field-right">
-          <div id="history" class="d-flex flex-column justify-start align-center elevation-10">
-            <h3 class="history-title">
-              {{ $t('game.history.title') }}
-            </h3>
-            <v-divider />
-            <div id="history-logs" ref="logsContainer" class="d-flex flex-column">
-              <p
-                v-for="(log, index) in logs"
-                :key="index"
-                class="my-2"
-                data-cy="history-log"
-              >
-                {{ log }}
-              </p>
+      <!-- Desktop History Card -->
+      <v-slide-x-reverse-transition>
+        <div v-if="$vuetify.display.smAndUp && showHistoryDrawer" class="history-container">
+          <div id="field-right">
+            <div id="history" class="d-flex flex-column justify-start align-center elevation-10">
+              <h3 class="history-title">{{ $t('game.history.title') }}</h3>
+              <v-divider />
+              <div id="history-logs" ref="logsContainer" class="d-flex flex-column">
+                <p v-for="(log, index) in logs" :key="index" class="my-2" data-cy="history-log">
+                  {{ log }}
+                </p>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      </v-slide-x-reverse-transition>
 
       <h3 id="player-score">
         <span>{{ t('game.score.points') }}: {{ gameStore.playerPointTotal }}</span>
@@ -328,7 +340,7 @@
           class="ml-2"
           :class="{ 'text-black': gameStore.isPlayersTurn, 'text-white': !gameStore.isPlayersTurn }"
         >
-          {{ turnText }}
+          {{ turnText }} {{ gameStore.timerEnabled ? ` - ${gameStore.turnTimer}s` : '' }}
         </span>
       </h3>
 
@@ -341,6 +353,17 @@
             class="user-cards-grid-container"
             :class="{ 'my-turn': gameStore.isPlayersTurn }"
           >
+            <div
+              v-show="gameStore.isPlayersTurn && gameStore.timerEnabled"
+              class="turn-timer-bar"
+              :style="{
+                width: `${(gameStore.turnTimer / gameStore.timerDuration) * 100}%`,
+                background:
+                  gameStore.turnTimer <= 10
+                    ? 'linear-gradient(to right, #ff0000, #ff5500)' // röd när lite tid kvar
+                    : 'linear-gradient(to right, #00ff64, #ffcc00)', // annars grön/gul
+              }"
+            />
             <UsernameToolTip
               v-if="$vuetify.display.smAndUp && !gameHistoryStore.showPlaybackControls"
               id="player-username-container"
@@ -440,6 +463,7 @@ import TargetSelectionOverlay from '@/routes/game/components/TargetSelectionOver
 import ScrapDialog from '@/routes/game/components/dialogs/components/ScrapDialog.vue';
 import SpectatorListMenu from '@/routes/game/components/SpectatorListMenu.vue';
 import PlaybackControls from './components/PlaybackControls.vue';
+import RulesMenuButton from './components/RulesMenuButton.vue';
 
 export default {
   name: 'GameView',
@@ -456,6 +480,7 @@ export default {
     BaseSnackbar,
     SpectatorListMenu,
     PlaybackControls,
+    RulesMenuButton,
   },
   setup() {
     const { t } = useI18n();
@@ -485,7 +510,7 @@ export default {
     },
     menuWrapperStyle() {
       return {
-        zIndex: this.isSpectating ? 2411 : 3 // Allows spectators to access game menu wrapper in any moment
+        zIndex: this.isSpectating ? 2411 : 3, // Allows spectators to access game menu wrapper in any moment
       };
     },
 
@@ -672,10 +697,10 @@ export default {
               opponentJackIds.push(card.attachments[card.attachments.length - 1].id);
             }
           });
-          return [ ...opponentFaceCardIds, ...opponentJackIds ];
+          return [...opponentFaceCardIds, ...opponentJackIds];
         }
         case 1:
-          return [ this.gameStore.opponent.faceCards.find((card) => card.rank === 12).id ];
+          return [this.gameStore.opponent.faceCards.find((card) => card.rank === 12).id];
         default:
           return [];
       }
@@ -695,10 +720,10 @@ export default {
           return this.gameStore.opponent.points.map((validTarget) => validTarget.id);
         case 'targetedOneOff': {
           // Twos and nines can target face cards
-          let res = [ ...this.validFaceCardTargetIds ];
+          let res = [...this.validFaceCardTargetIds];
           // Nines can additionally target points if opponent has no queens
           if (selectedCard.rank === 9 && this.gameStore.opponentQueenCount === 0) {
-            res = [ ...res, ...this.gameStore.opponent.points.map((validTarget) => validTarget.id) ];
+            res = [...res, ...this.gameStore.opponent.points.map((validTarget) => validTarget.id)];
           }
           return res;
         }
@@ -751,7 +776,7 @@ export default {
       if (this.gameStore.id && oldTopCard && !newTopCard) {
         this.showCustomSnackbarMessage('game.snackbar.draw.exhaustedDeck');
       }
-    }
+    },
   },
   async mounted() {
     if (!this.authStore.authenticated) {
@@ -902,16 +927,14 @@ export default {
         const { resolvingSeven } = this.gameStore;
         const deckIndex = this.topCardIsSelected ? 0 : 1;
         if (!resolvingSeven) {
-          await this.gameStore
-            .requestPlayFaceCard(this.selectedCard.id);
+          await this.gameStore.requestPlayFaceCard(this.selectedCard.id);
         } else {
-          await this.gameStore
-            .requestPlayFaceCardSeven({
-              cardId: this.cardSelectedFromDeck.id,
-              index: deckIndex,
-            });
+          await this.gameStore.requestPlayFaceCardSeven({
+            cardId: this.cardSelectedFromDeck.id,
+            index: deckIndex,
+          });
         }
-      } catch(messageKey){
+      } catch (messageKey) {
         this.handleError(messageKey);
       } finally {
         this.clearSelection();
@@ -1097,8 +1120,8 @@ export default {
       }
     },
     isBeingDiscarded(card) {
-      return this.gameStore.lastEventDiscardedCards?.some(discardedCard => discardedCard.id === card.id); 
-    }
+      return this.gameStore.lastEventDiscardedCards?.some((discardedCard) => discardedCard.id === card.id);
+    },
   },
 };
 </script>
@@ -1215,6 +1238,13 @@ export default {
   display: inline-block;
   right: 0;
   margin: 10px;
+}
+
+.menu-icon-list {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
 
 .valid-move {
@@ -1368,25 +1398,19 @@ export default {
       height: 85%;
       font-size: 0.75em;
       letter-spacing: 0.25px;
-      font-family:
-        'Libre Baskerville',
-        Century Gothic,
-        CenturyGothic,
-        AppleGothic,
-        sans-serif;
+      font-family: 'changa', serif;
     }
   }
+}
+
+.c-history-drawer {
+  background-color: rgba(241, 200, 160, 0.9);
 }
 
 .history-title {
   font-size: 1.25em;
   font-weight: 700;
-  font-family:
-    'Cormorant Infant',
-    Century Gothic,
-    CenturyGothic,
-    AppleGothic,
-    sans-serif;
+  font-family: 'changa', serif;
 }
 
 @media screen and (min-width: 1024px) {
@@ -1413,7 +1437,7 @@ export default {
     }
   }
   .history-title {
-    font-size: 48px;
+    font-size: 2.5rem;
   }
 }
 
@@ -1492,17 +1516,33 @@ export default {
     border-radius: 4px;
     transition: all 1s;
     &.my-turn {
-      border: 4px solid rgba(var(--v-theme-accent));
-      box-shadow:
-        0 15px 16px -12px rgba(0, 123, 59, 0.8),
-        0 24px 38px 12px rgba(0, 123, 59, 0.8),
-        0 10px 50px 16px rgba(33, 150, 83, 0.8) !important;
+      border: none;
+      box-shadow: 0 0 20px rgba(0, 255, 100, 0.4);
       background: linear-gradient(0deg, rgba(253, 98, 34, 1), rgba(255, 255, 255, 0.3));
     }
     &:not(.my-turn) {
       border: 4px solid transparent;
     }
   }
+}
+
+.turn-timer-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 6px;
+  width: 100%;
+  background: linear-gradient(to right, #00ff64, #ffcc00);
+  border-top-left-radius: 4px;
+  border-top-right-radius: 4px;
+  transition: width 1s linear;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.turn-timer-bar.opponent {
+  top: auto;
+  bottom: 0;
 }
 
 .user-cards-grid-container {

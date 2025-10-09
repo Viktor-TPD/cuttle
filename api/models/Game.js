@@ -106,6 +106,28 @@ module.exports = {
       type: 'boolean',
       defaultsTo: false,
     },
+    timerEnabled: {
+      type: 'boolean',
+      defaultsTo: false,
+    },
+    timerType: {
+      type: 'string',
+      isIn: ['turn', 'chess'],
+      defaultsTo: 'turn',
+    },
+    timerDuration: {
+      type: 'number',
+      defaultsTo: 90,
+    },
+    // @todo CHESS TIMER SETTINGS:
+    timerP0Remaining: {
+      type: 'number',
+      allowNull: true,
+    },
+    timerP1Remaining: {
+      type: 'number',
+      allowNull: true,
+    },
     p0: {
       model: 'user',
     },

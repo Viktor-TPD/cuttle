@@ -26,6 +26,7 @@
         />
       </v-btn>
     </template>
+
     <v-list density="compact" class="bg-surface-2 text-surface-1">
       <TheLanguageSelector has-chevron />
       <DiscordLink />
@@ -66,8 +67,8 @@ defineProps({
 const menuItems = computed(() => {
   return [ { text: t('global.logout'), icon: 'logout', page: { name: ROUTE_NAME_LOGOUT }, cyName: 'Log Out' } ];
 });
-
 </script>
+
 <style scoped>
 .chevron-icon {
   transition: transform 0.3s ease-in-out;

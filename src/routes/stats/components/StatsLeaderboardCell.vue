@@ -1,5 +1,5 @@
 <template>
-  <v-menu v-if="points" v-model="showMenu" location="top">
+  <BaseMenu v-if="points" v-model="showMenu" location="top">
     <template #activator="{ props }">
       <v-chip
         :color="colorForScore"
@@ -13,6 +13,7 @@
         {{ chipText }}
       </v-chip>
     </template>
+
     <v-card :data-player-results="`${username}-week-${week}`">
       <v-card-title>{{ username }} {{ menuHeader }} {{ t('stats.results') }}</v-card-title>
       <v-card-text>
@@ -40,15 +41,19 @@
         </v-btn>
       </v-card-actions>
     </v-card>
-  </v-menu>
+  </BaseMenu>
 </template>
 
 <script>
 import { Metrics } from '@/routes/stats/components/StatsLeaderboard.vue';
 import { useI18n } from 'vue-i18n';
+import BaseMenu from '@/components/BaseMenu.vue';
 
 export default {
   name: 'StatsLeaderboardCell',
+  components: {
+    BaseMenu,
+  },
   props: {
     playerRow: {
       type: Object,
@@ -161,10 +166,6 @@ export default {
           return 'outlined';
       }
     },
-    /**
-     * Returns an object for v-bind for testing attributes to identify table cell
-     * @example {'data-points-2': 'someUserName'} identifies someUserNames' data-week-2 points
-     */
     dataAttribute() {
       const res = {};
       const attributeName = `data-week-${this.week}`;
