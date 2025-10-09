@@ -18,10 +18,8 @@ const props = defineProps({
 
 const emit = defineEmits(['update:modelValue']);
 
-// Internal state for uncontrolled usage
 const internalState = ref(false);
 
-// Use internal state when modelValue is not provided
 const menuState = computed({
   get: () => props.modelValue !== undefined ? props.modelValue : internalState.value,
   set: (value) => {
