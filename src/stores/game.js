@@ -1,4 +1,4 @@
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { defineStore } from 'pinia';
 import { useAuthStore } from '@/stores/auth';
 import { useGameHistoryStore } from '@/stores/gameHistory';
@@ -142,6 +142,54 @@ export const useGameStore = defineStore('game', () => {
   const playerWins = computed(() => gameIsOver.value && winnerPNum.value === myPNum.value);
   const resolvingSeven = computed(() => phase.value === GamePhase.RESOLVING_SEVEN);
   const isPlayersTurn = computed(() => turn.value % 2 === myPNum.value);
+
+  const turnTimer = ref(0);
+  let turnInterval = null;
+
+  watch(turn, (newTurn, oldTurn) => {
+    console.log(`Turn changed from ${oldTurn} to ${newTurn}, resetting turn timer`);
+    resetTurnTimer();
+  });
+
+  function resetTurnTimer() {
+    clearInterval(turnInterval);
+
+    if (gameIsOver.value || !timerEnabled.value) {
+      console.log('Timer not started, either game over or timer disabled', {
+        gameIsOver: gameIsOver.value,
+        timerEnabled: timerEnabled.value,
+        timerDuration: timerDuration.value,
+      });
+      return;
+    }
+
+    turnTimer.value = timerDuration.value;
+
+    turnInterval = setInterval(async () => {
+      turnTimer.value--;
+
+      if (turnTimer.value <= 0) {
+        clearInterval(turnInterval);
+
+        if (!isPlayersTurn.value) {
+          return;
+        }
+
+        try {
+          await requestPass();
+        } catch (err) {
+          console.error('Error auto-passing:', err);
+        }
+      }
+    }, 1000);
+  }
+
+  watch(gameIsOver, (over) => {
+    if (over) {
+      clearInterval(turnInterval);
+    }
+  });
+
   const hasGlassesEight = computed(
     () => player.value?.faceCards?.filter((card) => card.rank === 8).length > 0 ?? false,
   );
@@ -240,6 +288,10 @@ export const useGameStore = defineStore('game', () => {
     status.value = newGame.status ?? GameStatus.ARCHIVED;
     phase.value = newGame.phase ?? GamePhase.MAIN;
     gameHistoryStore.gameStates = newGame.gameStates ?? [];
+
+    console.log(newGame.timerEnabled, newGame.timerDuration);
+
+    resetTurnTimer();
   }
   function opponentJoined(newPlayer) {
     players.value.push(cloneDeep(newPlayer));
@@ -432,6 +484,11 @@ export const useGameStore = defineStore('game', () => {
   function requestGameState(gameId, gameStateIndex = -1, route = null) {
     return new Promise((resolve, reject) => {
       io.socket.get(`/api/game/${gameId}?gameStateIndex=${gameStateIndex}`, (res, jwres) => {
+        console.log('📡 requestGameState response:', {
+          timerEnabled: res.game?.timerEnabled,
+          timerType: res.game?.timerType,
+          timerDuration: res.game?.timerDuration,
+        });
         switch (jwres.statusCode) {
           case 200:
             resetState();
@@ -683,6 +740,8 @@ export const useGameStore = defineStore('game', () => {
     conceded,
     currentMatch,
     iWantToContinueSpectating,
+    timerDuration,
+    turnTimer,
     status,
     // Getters
     myPNum,
